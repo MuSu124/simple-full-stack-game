@@ -15,6 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def env_bool(name, default=False):
+    # 这是个工具函数，用于读取布尔类型的环境变量，例如true/false或1/0。
     """Read a boolean environment variable such as true/false or 1/0."""
     value = os.environ.get(name)
     if value is None:
@@ -23,6 +24,7 @@ def env_bool(name, default=False):
 
 
 def env_list(name, default=None):
+    # 这是个工具函数，用于读取逗号分隔的环境变量，并返回一个干净的列表。
     """Read a comma-separated environment variable into a clean list."""
     value = os.environ.get(name)
     if value is None:
@@ -36,6 +38,8 @@ DEBUG = env_bool("DEBUG", default=True)
 # The fallback key is only for local development. Production refuses to start
 # without a secret supplied through the environment.
 SECRET_KEY = os.environ.get("SECRET_KEY")
+# secret key是django的密钥，用于加密和解密数据，必须保密，不能泄露。生产环境下必须设置SECRET_KEY，否则会抛出异常
+# 之所以不在源代码中设置SECRET_KEY，是因为源代码可能会被公开，或者被多人使用，如果SECRET_KEY泄露，可能会导致数据被篡改或者泄露，所以生产环境下必须通过环境变量来设置SECRET_KEY
 if not SECRET_KEY:
     if DEBUG:
         SECRET_KEY = "django-insecure-local-development-only"
@@ -43,6 +47,9 @@ if not SECRET_KEY:
         raise ImproperlyConfigured("SECRET_KEY must be set when DEBUG is false.")
 
 ALLOWED_HOSTS = env_list(
+    # 这个参数的本质是，允许哪些主机名可以访问这个django后端文件
+    # 更详细地说，只有本地开发环境和Render平台的主机名可以访问这个django后端，其他主机名都会被拒绝访问（客户不应该直接访问后端，而是通过前端访问后端）
+    # 所以这里会放localhost和render平台的主机名，render平台的主机名是通过环境变量RENDER_EXTERNAL_HOSTNAME获取的
     "ALLOWED_HOSTS",
     default=["127.0.0.1", "localhost"],
 )
@@ -54,6 +61,7 @@ if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
 
 
 INSTALLED_APPS = [
+    # 这个参数是django的应用程序列表，包含了django自带的应用程序和我们自己创建的应用程序
     "corsheaders",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -62,10 +70,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "accounts",
-    "game",
+    "characters",
 ]
 
 MIDDLEWARE = [
+    # 这个参数是django的中间件列表，中间件是处理请求和响应的钩子框架
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     # CORS must run before middleware that can create a response, especially
@@ -103,6 +112,7 @@ WSGI_APPLICATION = "monster_game.wsgi.application"
 # Use local SQLite when DATABASE_URL is absent and Render PostgreSQL when it is
 # present. Render supplies DATABASE_URL after the database is linked.
 DATABASES = {
+    # 这个参数用来放数据库的配置，默认是sqlite数据库，生产环境下使用PostgreSQL数据库
     "default": dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600,
@@ -149,11 +159,17 @@ STORAGES = {
 
 # Vite's default development origins. Production origins should be provided as
 # a comma-separated CORS_ALLOWED_ORIGINS environment variable on Render.
+
+# 这个配置非常重要
+# 在本地运行中，前后端的端口号不同，前端是5175，后端是8000，所以需要设置允许跨域访问的域名，否则前端无法访问后端的接口
 LOCAL_FRONTEND_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    "http://localhost:5175",
+    "http://127.0.0.1:5175",
 ]
+
 CORS_ALLOWED_ORIGINS = env_list(
+    # 这个参数是用来设置允许跨域访问的域名的，
+    # 作用是：因为前后端部署在不同平台上，所以需要设置允许跨域访问的域名，否则前端无法访问后端的接口
     "CORS_ALLOWED_ORIGINS",
     default=LOCAL_FRONTEND_ORIGINS if DEBUG else [],
 )

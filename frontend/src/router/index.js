@@ -22,6 +22,7 @@ const router = createRouter({
     },
     {
       path: '/monsters',
+      name: 'monsters',
       component: MonsterPage,
     },
   ],

@@ -21,5 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # 所有以 api/auth/ 开头的请求，继续交给 accounts.urls
     path("api/auth/", include("accounts.urls")),
-    path("api/characters/", include("game.urls")),
+    path("api/characters/", include("characters.urls")),
 ]

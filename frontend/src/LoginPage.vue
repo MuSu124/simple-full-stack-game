@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const mode = ref('login')
 const loading = ref(false)
 const message = ref('')
@@ -34,6 +36,7 @@ async function submitForm() {
     const response = await fetch(`${apiBaseUrl}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // 允许跨域请求携带cookie
       body: JSON.stringify({ username: form.username, password: form.password }),
     }) // 发出一个请求，向后端发送用户名和密码，后端会返回一个响应，这个响应存在于response变量中
     const data = await response.json().catch(() => ({})) // 解析响应的JSON数据，如果解析失败，就返回一个空对象
@@ -41,7 +44,10 @@ async function submitForm() {
 
     messageType.value = 'success'
     message.value = data.message || (mode.value === 'login' ? '登录成功！' : '注册成功，请登录。')
-    if (mode.value === 'register') {
+    if (mode.value === 'login') {
+      await router.push('/characters')
+      // 登录成功后跳转到角色列表页面（通过router.push 实现页面跳转）
+    } else {
       form.password = ''
       form.passwordConfirm = ''
       mode.value = 'login'

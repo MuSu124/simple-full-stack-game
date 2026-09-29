@@ -27,7 +27,7 @@
 
 - `corsheaders`：让 Vue 可以跨域访问 API。
 - `django.contrib.*`：Django 自带的用户、Session、Admin 和静态文件功能。
-- `accounts`、`game`：项目自己的 Django app。
+- `accounts`、`characters`：项目自己的 Django app。
 
 ### `MIDDLEWARE`
 
